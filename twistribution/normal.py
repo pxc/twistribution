@@ -1,3 +1,5 @@
+import math
+
 from twistribution.bernoulli import Bernoulli
 from twistribution.distribution import ContinuousDistribution
 
@@ -80,3 +82,9 @@ class Normal(ContinuousDistribution):
             raise TypeError(
                 "Can only compare a Normal distribution with another Normal or a scalar"
             )
+
+
+def normal_pdf(x, mean, variance):
+    coefficient = 1.0 / math.sqrt(2 * math.pi * variance)
+    exponent = -((x - mean) ** 2) / (2 * variance)
+    return coefficient * math.exp(exponent)
