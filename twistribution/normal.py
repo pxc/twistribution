@@ -1,4 +1,5 @@
-import math
+from math import erf, sqrt, pi, exp
+from typing import Any
 
 from twistribution.bernoulli import Bernoulli
 from twistribution.distribution import ContinuousDistribution
@@ -11,80 +12,61 @@ class Normal(ContinuousDistribution):
         self.mean = mean
         self.stddev = stddev
 
-    def __str__(self):
-        return f"Normal({self.mean}, {self.stddev})"
+    def parameters(self) -> tuple[Any, ...]:
+        return self.mean, self.stddev
 
-    def __repr__(self):
-        return str(self)
+    def pdf(self, x: float) -> float:
+        return normal_pdf(x=x, mean=self.mean, variance=self.stddev**2)
 
-    def __eq__(self, other):
-        if not isinstance(other, Normal):
-            return NotImplemented
-        return self.mean == other.mean and self.stddev == other.stddev
+    def cdf(self, x: float) -> float:
+        return (1 + erf(x / sqrt(2))) / 2
+
+    def __lt__(self, other):
+        if isinstance(other, Normal):
+            combined_stddev = sqrt(self.stddev**2 + other.stddev**2)
+            z = (self.mean - other.mean) / combined_stddev
+            # Use the standard Normal CDF approximation with the Error function erf
+            p = 0.5 * (1 + erf(z / sqrt(2)))
+            return Bernoulli(1 - p)
+        elif isinstance(other, (int, float)):
+            z = (self.mean - other) / self.stddev
+            # Use the standard Normal CDF approximation with the Error function erf
+            p = 0.5 * (1 + erf(z / sqrt(2)))
+            return Bernoulli(1 - p)
+        return NotImplemented
 
     def __add__(self, other):
-        if isinstance(other, Normal):
+        if isinstance(other, (int, float)):
+            return Normal(self.mean + other, self.stddev)
+        elif isinstance(other, Normal):
             return Normal(
                 self.mean + other.mean, (self.stddev**2 + other.stddev**2) ** 0.5
             )
-        else:
-            return Normal(self.mean + other, self.stddev)
-
-    def __radd__(self, other):
-        return self.__add__(other)
+        return NotImplemented
 
     def __sub__(self, other):
-        if isinstance(other, Normal):
+        if isinstance(other, (int, float)):
+            return Normal(self.mean - other, self.stddev)
+        elif isinstance(other, Normal):
             return Normal(
                 self.mean - other.mean, (self.stddev**2 + other.stddev**2) ** 0.5
             )
-        else:
-            return Normal(self.mean - other, self.stddev)
+        return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
             return Normal(self.mean * other, abs(self.stddev * other))
-        elif isinstance(other, Normal):
-            raise NotImplementedError(
-                "Multiplication of two Normals is not defined in a simple way."
-            )
-        else:
-            raise TypeError("Can only multiply a Normal distribution by a scalar")
-
-    def __rmul__(self, other):
-        return self.__mul__(other)
+        return NotImplemented
 
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             if other == 0:
                 raise ZeroDivisionError("Cannot divide by zero")
             return Normal(self.mean / other, self.stddev / abs(other))
-        else:
-            raise TypeError("Can only divide a Normal distribution by a scalar")
-
-    def __gt__(self, other):
-        if isinstance(other, Normal):
-            from math import sqrt, erf
-
-            combined_stddev = sqrt(self.stddev**2 + other.stddev**2)
-            z = (self.mean - other.mean) / combined_stddev
-            # Use the standard Normal CDF approximation with the Error function erf
-            p = 0.5 * (1 + erf(z / sqrt(2)))
-            return Bernoulli(p)
-        elif isinstance(other, (int, float)):
-            from math import sqrt, erf
-
-            z = (self.mean - other) / self.stddev
-            # Use the standard Normal CDF approximation with the Error function erf
-            p = 0.5 * (1 + erf(z / sqrt(2)))
-            return Bernoulli(p)
-        else:
-            raise TypeError(
-                "Can only compare a Normal distribution with another Normal or a scalar"
-            )
+        return NotImplemented
 
 
 def normal_pdf(x, mean, variance):
-    coefficient = 1.0 / math.sqrt(2 * math.pi * variance)
+    coefficient = 1.0 / sqrt(2 * pi * variance)
     exponent = -((x - mean) ** 2) / (2 * variance)
-    return coefficient * math.exp(exponent)
+    return coefficient * exp(exponent)

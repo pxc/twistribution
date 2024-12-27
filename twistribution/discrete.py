@@ -1,9 +1,11 @@
 from collections import defaultdict
+from typing import Any
 
 from twistribution.bernoulli import Bernoulli
+from twistribution.distribution import DiscreteDistribution
 
 
-class Discrete:
+class Discrete(DiscreteDistribution):
     """
     Numerical values and associated probabilities.
     """
@@ -26,11 +28,8 @@ class Discrete:
         self.probabilities = probabilities
         self.equality_tolerance = equality_tolerance
 
-    def __str__(self):
-        return f"Discrete({self.probabilities})"
-
-    def __repr__(self):
-        return str(self)
+    def parameters(self) -> tuple[Any, ...]:
+        return self.probabilities, self.equality_tolerance
 
     def __eq__(self, other):
         if not isinstance(other, Discrete):
