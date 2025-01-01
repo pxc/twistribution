@@ -1,9 +1,17 @@
 from abc import abstractmethod, ABC
 from typing import Any
 
+from twistribution.constants import DEFAULT_EQUALITY_TOLERANCE
+
 
 class Distribution(ABC):
     """Base class for all distributions."""
+
+    def __init__(self, equality_tolerance: float = DEFAULT_EQUALITY_TOLERANCE):
+        self.equality_tolerance = equality_tolerance
+
+    def approximately_equal(self, a, b):
+        return abs(a - b) < self.equality_tolerance
 
     @abstractmethod
     def parameters(self) -> tuple[Any, ...]:
@@ -22,7 +30,10 @@ class Distribution(ABC):
         if not isinstance(other, type(self)):
             return NotImplemented
         for p1, p2 in zip(self.parameters(), other.parameters(), strict=True):
-            if p1 != p2:
+            if isinstance(p1, float) and isinstance(p2, float):
+                if not self.approximately_equal(p1, p2):
+                    return False
+            elif p1 != p2:
                 return False
         return True
 
@@ -82,3 +93,29 @@ class ContinuousDistribution(Distribution, ABC):
 
 class DiscreteDistribution(Distribution, ABC):
     """Base class for discrete distributions."""
+
+    @abstractmethod
+    def __lt__(self, other):
+        pass
+
+    @abstractmethod
+    def __le__(self, other):
+        pass
+
+    def __gt__(self, other):
+        # avoid cyclic dependency by importing here
+        from twistribution.bernoulli import Bernoulli
+
+        le = self.__le__(other)
+        if le is NotImplemented:
+            return NotImplemented
+        return Bernoulli(1 - le.p)
+
+    def __ge__(self, other):
+        # avoid cyclic dependency by importing here
+        from twistribution.bernoulli import Bernoulli
+
+        lt = self.__lt__(other)
+        if lt is NotImplemented:
+            return NotImplemented
+        return Bernoulli(1 - lt.p)

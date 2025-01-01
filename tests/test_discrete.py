@@ -48,12 +48,15 @@ class TestFairCoinToss:
 
     def test_sum_of_three_coins_probabilities(self):
         three_coins = self.coin + self.coin + self.coin
+        assert isinstance(three_coins, Discrete)
 
         prob_greater_than_1 = three_coins > 1
-        assert prob_greater_than_1 == Bernoulli(0.5)
+        assert prob_greater_than_1 == Bernoulli(0.5), str(prob_greater_than_1)
 
         prob_greater_than_or_equal_1 = three_coins >= 1
-        assert prob_greater_than_or_equal_1 == Bernoulli(0.875)
+        assert prob_greater_than_or_equal_1 == Bernoulli(0.875), str(
+            prob_greater_than_or_equal_1
+        )
 
 
 class TestFairDice:

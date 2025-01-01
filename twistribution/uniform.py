@@ -1,11 +1,15 @@
 from typing import Any
 
 from twistribution.bernoulli import Bernoulli
+from twistribution.constants import DEFAULT_EQUALITY_TOLERANCE
 from twistribution.distribution import ContinuousDistribution
 
 
 class Uniform(ContinuousDistribution):
-    def __init__(self, a: float, b: float):
+    def __init__(
+        self, a: float, b: float, equality_tolerance: float = DEFAULT_EQUALITY_TOLERANCE
+    ):
+        super().__init__(equality_tolerance)
         if a >= b:
             raise ValueError("a must be less than b")
 
@@ -57,7 +61,6 @@ class Uniform(ContinuousDistribution):
             if a1 <= a2:
                 prob = self._prob_first_less_than_second(a1, b1, a2, b2)
             else:
-                # P(X < Y) = 1 - P(Y < X)
                 prob = 1.0 - self._prob_first_less_than_second(a2, b2, a1, b1)
 
             return Bernoulli(prob)

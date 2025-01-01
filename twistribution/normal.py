@@ -2,11 +2,18 @@ from math import erf, sqrt, pi, exp
 from typing import Any
 
 from twistribution.bernoulli import Bernoulli
+from twistribution.constants import DEFAULT_EQUALITY_TOLERANCE
 from twistribution.distribution import ContinuousDistribution
 
 
 class Normal(ContinuousDistribution):
-    def __init__(self, mean: float, stddev: float):
+    def __init__(
+        self,
+        mean: float,
+        stddev: float,
+        equality_tolerance: float = DEFAULT_EQUALITY_TOLERANCE,
+    ):
+        super().__init__(equality_tolerance)
         if stddev < 0:
             raise ValueError("Standard deviation must be non-negative")
         self.mean = mean

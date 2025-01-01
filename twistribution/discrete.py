@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Any
 
 from twistribution.bernoulli import Bernoulli
+from twistribution.constants import DEFAULT_EQUALITY_TOLERANCE
 from twistribution.distribution import DiscreteDistribution
 
 
@@ -11,8 +12,12 @@ class Discrete(DiscreteDistribution):
     """
 
     def __init__(
-        self, probabilities: dict[float | int, float], equality_tolerance=1e-8
+        self,
+        probabilities: dict[float | int, float],
+        equality_tolerance: float = DEFAULT_EQUALITY_TOLERANCE,
     ):
+        super().__init__(equality_tolerance)
+
         if not probabilities:
             raise ValueError("Probabilities cannot be empty")
 
@@ -26,7 +31,6 @@ class Discrete(DiscreteDistribution):
             raise ValueError("Probability values must sum to 1")
 
         self.probabilities = probabilities
-        self.equality_tolerance = equality_tolerance
 
     def parameters(self) -> tuple[Any, ...]:
         return self.probabilities, self.equality_tolerance
@@ -39,9 +43,8 @@ class Discrete(DiscreteDistribution):
             return False
 
         for key in self.probabilities:
-            if (
-                abs(self.probabilities[key] - other.probabilities[key])
-                > self.equality_tolerance
+            if not self.approximately_equal(
+                self.probabilities[key], other.probabilities[key]
             ):
                 return False
 
@@ -80,28 +83,20 @@ class Discrete(DiscreteDistribution):
     def __radd__(self, other):
         return self.__add__(other)
 
-    def __gt__(self, other):
+    def __lt__(self, other):
         if isinstance(other, (float, int)):
-            if other < next(iter(self.probabilities.keys())):
-                return Bernoulli(1.0)
-
-            cumulative = 0.0
+            probability = 0.0
             for k, v in self.probabilities.items():
-                if k > other:
-                    return Bernoulli(1.0 - cumulative)
-                cumulative += v
+                if k < other:
+                    probability += v
+            return Bernoulli(probability)
+        return NotImplemented
 
-            return Bernoulli(0.0)
-
-    def __ge__(self, other):
+    def __le__(self, other):
         if isinstance(other, (float, int)):
-            if other < next(iter(self.probabilities.keys())):
-                return Bernoulli(1.0)
-
-            cumulative = 0.0
+            probability = 0.0
             for k, v in self.probabilities.items():
-                if k >= other:
-                    return Bernoulli(1.0 - cumulative)
-                cumulative += v
-
-            return Bernoulli(0.0)
+                if k <= other:
+                    probability += v
+            return Bernoulli(probability)
+        return NotImplemented
