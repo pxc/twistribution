@@ -90,6 +90,13 @@ class Discrete(DiscreteDistribution):
                 if k < other:
                     probability += v
             return Bernoulli(probability)
+        elif isinstance(other, Discrete):
+            cumulative_probability = 0.0
+            for k1, v1 in self.probabilities.items():
+                for k2, v2 in other.probabilities.items():
+                    if k1 < k2:
+                        cumulative_probability += v1 * v2
+            return Bernoulli(cumulative_probability)
         return NotImplemented
 
     def __le__(self, other):
@@ -99,4 +106,11 @@ class Discrete(DiscreteDistribution):
                 if k <= other:
                     probability += v
             return Bernoulli(probability)
+        elif isinstance(other, Discrete):
+            cumulative_probability = 0.0
+            for k1, v1 in self.probabilities.items():
+                for k2, v2 in other.probabilities.items():
+                    if k1 <= k2:
+                        cumulative_probability += v1 * v2
+            return Bernoulli(cumulative_probability)
         return NotImplemented

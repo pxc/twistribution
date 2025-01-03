@@ -9,6 +9,7 @@ class Bernoulli(DiscreteDistribution):
         self, p: float, equality_tolerance: float = DEFAULT_EQUALITY_TOLERANCE
     ):
         super().__init__(equality_tolerance)
+        self.p = p  # set before validation for repr, etc.
 
         if p < 0:
             if p >= -self.equality_tolerance:
@@ -20,7 +21,6 @@ class Bernoulli(DiscreteDistribution):
                 p = 1
             else:
                 raise ValueError(f"Probability p must be in the range [0, 1]; got {p}.")
-        self.p = p
 
     def parameters(self) -> tuple[Any, ...]:
         return (self.p,)

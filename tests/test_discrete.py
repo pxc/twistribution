@@ -22,6 +22,17 @@ def test_add_scalar():
     assert updated == Discrete({2.5: 0.25, 3.5: 0.25, 5.5: 0.25, 6.5: 0.25})
 
 
+def test_comparison_with_two_discrete():
+    d1 = Discrete({1: 0.25, 2: 0.25, 3: 0.25, 4: 0.25})
+    d2 = Discrete({1: 0.25, 2: 0.25, 3: 0.25, 4: 0.25})
+    lt = d1 < d2
+    expected_lt_probability = 0.25 * 0.75 + 0.25 * 0.5 + 0.25 * 0.25
+    assert lt == Bernoulli(expected_lt_probability)
+    le = d1 <= d2
+    expected_le_probability = 0.25 * 1.0 + 0.25 * 0.75 + 0.25 * 0.5 + 0.25 * 0.25
+    assert le == Bernoulli(expected_le_probability)
+
+
 class TestFairCoinToss:
     """
     Tests of a fair coin, represented as a Discrete() where 0 represents Tails and 1 represents Heads.

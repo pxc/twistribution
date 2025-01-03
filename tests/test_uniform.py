@@ -1,22 +1,7 @@
 import random
+from tests.utils_for_testing import estimate_probability
 from twistribution.bernoulli import Bernoulli
 from twistribution.uniform import Uniform
-
-
-def estimate_probability(samples=1000000):
-    """Decorator that estimates probability by random sampling"""
-
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            count = 0
-            for _ in range(samples):
-                if func(*args, **kwargs):
-                    count += 1
-            return count / samples
-
-        return wrapper
-
-    return decorator
 
 
 @estimate_probability()
