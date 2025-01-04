@@ -37,6 +37,12 @@ class Distribution(ABC):
                 return False
         return True
 
+    def __ne__(self, other):
+        eq_result = self.__eq__(other)
+        if eq_result is NotImplemented:
+            return NotImplemented
+        return not eq_result
+
 
 class ContinuousDistribution(Distribution, ABC):
     """Base class for continuous distributions."""
