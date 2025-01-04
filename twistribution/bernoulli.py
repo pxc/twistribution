@@ -1,5 +1,6 @@
 from typing import Any
 
+from twistribution.constant import Constant
 from twistribution.constants import DEFAULT_EQUALITY_TOLERANCE
 from twistribution.distribution import DiscreteDistribution
 
@@ -34,9 +35,9 @@ class Bernoulli(DiscreteDistribution):
     def __lt__(self, other):
         if isinstance(other, (float, int)):
             if other <= 0:
-                return Bernoulli(0)
+                return Constant(0)
             elif other > 1:
-                return Bernoulli(1)
+                return Constant(1)
             else:
                 return Bernoulli(1 - self.p)
         elif isinstance(other, Bernoulli):
@@ -47,7 +48,7 @@ class Bernoulli(DiscreteDistribution):
     def __le__(self, other):
         if isinstance(other, (float, int)):
             if other < 0:
-                return Bernoulli(0)
+                return Constant(0)
             elif other >= 1:
                 return Bernoulli(1)
             else:
